@@ -1,5 +1,9 @@
 package com.example.shiftime.utils
 
+import com.example.shiftime.utils.enums.Days
+import java.text.SimpleDateFormat
+import java.util.Date
+import java.util.Locale
 import kotlin.text.get
 
 object HebrewDateMap {
@@ -33,5 +37,29 @@ object HebrewDateMap {
 
     fun generateDaysList(from : Int = 1 , to : Int = 1): List<Int> {
         return (from.until(to)).toList()
+    }
+
+    fun Date.formatToHourMinute(): String {
+        val formatter = SimpleDateFormat("HH:mm", Locale.getDefault())
+        return formatter.format(this)
+    }
+
+    fun Date.formatToDayMonthYear(): String {
+        val formatter = SimpleDateFormat("dd/MM/yyyy", Locale.getDefault())
+        return formatter.format(this)
+
+    }
+
+    fun indexToDaysEnum(index: Int): Days {
+        return when (index) {
+            0 -> Days.SUNDAY
+            1 -> Days.MONDAY
+            2 -> Days.TUESDAY
+            3 -> Days.WEDNESDAY
+            4 -> Days.THURSDAY
+            5 -> Days.FRIDAY
+            6 -> Days.SATURDAY
+            else -> throw IllegalArgumentException("Index must be between 0 and 6")
+        }
     }
 }

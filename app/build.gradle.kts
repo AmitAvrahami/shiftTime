@@ -7,6 +7,7 @@ plugins {
     id("kotlin-kapt")
     id("com.google.devtools.ksp")
     id("com.google.dagger.hilt.android")
+    id("dagger.hilt.android.plugin")
 }
 
 android {
@@ -77,6 +78,22 @@ dependencies {
     implementation(libs.hilt.android)
     kapt(libs.hilt.android.compiler)
     implementation(libs.androidx.ui.text.google.fonts)
+    // Hilt
+    implementation(libs.hilt.android.v248)
+    kapt( libs.hilt.compiler)
+
+    // Lifecycle (ViewModel + StateFlow)
+    implementation (libs.androidx.lifecycle.viewmodel.ktx)
+    implementation (libs.androidx.lifecycle.runtime.ktx.v262)
+
+    // Compose + Hilt integration
+    implementation (libs.androidx.hilt.navigation.compose)
+
+    // Kotlin Coroutines
+    implementation (libs.kotlinx.coroutines.core)
+    implementation (libs.kotlinx.coroutines.android)
+
+    implementation(libs.gson)
 
 
 }
