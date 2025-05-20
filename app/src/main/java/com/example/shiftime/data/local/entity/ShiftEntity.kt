@@ -4,13 +4,8 @@ import androidx.room.Entity
 import androidx.room.ForeignKey
 import androidx.room.Index
 import androidx.room.PrimaryKey
-import androidx.room.TypeConverter
 import androidx.room.TypeConverters
 import com.example.shiftime.data.local.converters.DateConverter
-import com.example.shiftime.domain.model.Shift
-import com.example.shiftime.utils.enums.Days
-import com.example.shiftime.utils.enums.ShiftStatus
-import com.example.shiftime.utils.enums.ShiftType
 import java.util.*
 
 @Entity(

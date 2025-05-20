@@ -2,7 +2,7 @@ package com.example.shiftime.data.local.converters
 
 import androidx.room.TypeConverter
 import com.example.shiftime.utils.enums.Days
-import com.example.shiftime.utils.enums.ShiftStatus
+import com.example.shiftime.utils.enums.AssignmentStatus
 import com.example.shiftime.utils.enums.ShiftType
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
@@ -52,8 +52,8 @@ class ShiftConverters {
     fun toDays(day: String): Days = Days.valueOf(day)
 
     @TypeConverter
-    fun fromShiftStatus(status: ShiftStatus): String = status.name
+    fun fromShiftStatus(status: AssignmentStatus): String = status.name
 
     @TypeConverter
-    fun toShiftStatus(status: String): ShiftStatus = ShiftStatus.valueOf(status)
+    fun toShiftStatus(status: String): AssignmentStatus = AssignmentStatus.valueOf(status)
 }

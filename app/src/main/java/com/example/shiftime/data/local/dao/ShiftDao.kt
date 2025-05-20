@@ -32,4 +32,6 @@ interface ShiftDao {
 
     @Query("SELECT * FROM shifts WHERE workWeekId = :workWeekId ORDER BY startTime")
     fun getShiftsByWorkWeekId(workWeekId: Long): Flow<List<ShiftEntity>>
+
+
 }

@@ -1,8 +1,6 @@
 package com.example.shiftime.domain.model
 
-import com.example.shiftime.data.local.entity.ShiftEntity
 import com.example.shiftime.utils.enums.Days
-import com.example.shiftime.utils.enums.ShiftStatus
 import com.example.shiftime.utils.enums.ShiftType
 import java.util.Date
 

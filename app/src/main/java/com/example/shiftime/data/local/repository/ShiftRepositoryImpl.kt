@@ -1,5 +1,7 @@
 package com.example.shiftime.data.repository
 
+import android.os.Build
+import androidx.annotation.RequiresApi
 import com.example.shiftime.data.local.dao.ShiftDao
 import com.example.shiftime.data.mapper.toDomain
 import com.example.shiftime.data.mapper.toEntity
@@ -7,6 +9,8 @@ import com.example.shiftime.domain.model.Shift
 import com.example.shiftime.domain.repository.ShiftRepository
 import com.example.shiftime.utils.enums.Days
 import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.StateFlow
+import kotlinx.coroutines.flow.catch
 import kotlinx.coroutines.flow.map
 import java.time.LocalDate
 import java.util.Calendar
@@ -32,6 +36,7 @@ class ShiftRepositoryImpl @Inject constructor(
         return shift
     }
 
+    @RequiresApi(Build.VERSION_CODES.O)
     override fun getShiftsForDateRange(startDate: LocalDate, endDate: LocalDate): Flow<List<Shift>> {
         val startCalendar = Calendar.getInstance().apply {
             set(startDate.year, startDate.monthValue - 1, startDate.dayOfMonth, 0, 0, 0)
@@ -59,4 +64,14 @@ class ShiftRepositoryImpl @Inject constructor(
         return shiftDao.getShiftsByWorkWeekId(workWeekId)
             .map { entities -> entities.map { it.toDomain() } }
     }
+
+    override suspend fun getShiftById(id: Long): Result<Shift?> {
+        return try {
+            val shiftEntity = shiftDao.getShiftById(id)
+            Result.success(shiftEntity?.toDomain())
+        } catch (e: Exception) {
+            Result.failure(e)
+        }
+    }
+
 }

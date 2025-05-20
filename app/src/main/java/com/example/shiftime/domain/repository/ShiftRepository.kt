@@ -15,4 +15,6 @@ interface ShiftRepository {
     fun getShiftsByDay(day: Days): Flow<List<Shift>>
     fun getAllShifts(): Flow<List<Shift>>
     fun getShiftsByWorkWeekId(workWeekId: Long): Flow<List<Shift>>
+    suspend fun getShiftById(id: Long): Result<Shift?>
+
 }

@@ -2,8 +2,13 @@ package com.example.shiftime.data.local.entity
 
 import androidx.room.Entity
 import androidx.room.ForeignKey
+import androidx.room.Index
+import androidx.room.util.TableInfo
+import com.example.shiftime.utils.enums.AssignmentStatus
+
+
 @Entity(
-    tableName = "employee_shift_cross_ref",
+    tableName = "shift_assignments",
     primaryKeys = ["employeeId", "shiftId"],
     foreignKeys = [
         ForeignKey(
@@ -16,10 +21,16 @@ import androidx.room.ForeignKey
             parentColumns = ["id"],
             childColumns = ["shiftId"]
         )
+    ],
+    indices = [
+        Index(value = ["employeeId"]),
+        Index(value = ["shiftId"])
     ]
 )
-data class EmployeeShiftCrossRef(
+data class ShiftAssignmentEntity(
     val employeeId: Long,
     val shiftId: Long,
-    val isAssigned: Boolean = true
+    val assignedAt: Long = System.currentTimeMillis(),
+    val status: String = AssignmentStatus.ASSIGNED.name,
+    val note: String? = null
 )
