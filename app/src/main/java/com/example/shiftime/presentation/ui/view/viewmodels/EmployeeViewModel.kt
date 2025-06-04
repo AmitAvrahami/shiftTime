@@ -316,29 +316,14 @@ class EmployeeViewModel @Inject constructor(
     }
 
     fun getEmployees() = viewModelScope.launch(Dispatchers.IO) {
-        getEmployeesUseCase().collect { res ->
-            when (res) {
-                is UiState.Success -> {
-                    val employees = res.data.map { it.toUiModel()}
+        _state.value = state.value.copy(
+            isLoading = true
+        )
+        getEmployeesUseCase().collect { employees ->
+                    val employees = employees.map { it.toUiModel()}
                     _state.update { it.copy(employees = employees)  }
                     _state.update {  it.copy( isLoading = false) }
-                }
 
-                is UiState.Error -> {
-                    _state.value = state.value.copy(
-                        error = res.message
-                    )
-                    _state.value = state.value.copy(
-                        isLoading = false
-                    )
-                }
-
-                is UiState.Loading -> {
-                    _state.value = state.value.copy(
-                        isLoading = true
-                    )
-                }
-            }
         }
     }
 

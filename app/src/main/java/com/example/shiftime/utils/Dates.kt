@@ -2,6 +2,7 @@ package com.example.shiftime.utils
 
 import com.example.shiftime.utils.enums.Days
 import java.text.SimpleDateFormat
+import java.util.Calendar
 import java.util.Date
 import java.util.Locale
 import kotlin.text.get
@@ -60,6 +61,24 @@ object HebrewDateMap {
             5 -> Days.FRIDAY
             6 -> Days.SATURDAY
             else -> throw IllegalArgumentException("Index must be between 0 and 6")
+        }
+    }
+
+
+}
+
+object DaysMapper {
+     fun getCurrentDay(): Days {
+        val calendar = Calendar.getInstance()
+        return when (calendar.get(Calendar.DAY_OF_WEEK)) {
+            Calendar.SUNDAY -> Days.SUNDAY
+            Calendar.MONDAY -> Days.MONDAY
+            Calendar.TUESDAY -> Days.TUESDAY
+            Calendar.WEDNESDAY -> Days.WEDNESDAY
+            Calendar.THURSDAY -> Days.THURSDAY
+            Calendar.FRIDAY -> Days.FRIDAY
+            Calendar.SATURDAY -> Days.SATURDAY
+            else -> Days.SUNDAY
         }
     }
 }

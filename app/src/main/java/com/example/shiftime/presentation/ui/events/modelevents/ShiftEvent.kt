@@ -11,7 +11,10 @@ sealed class ShiftEvent {
     data class UpdateShift(val shift: Shift) : ShiftEvent()
     data class ShowEditShiftDialog(val shift: Shift) : ShiftEvent()
     data class ActivateWorkWeek(val workWeekId: Long) : ShiftEvent()
+    object TestDataExtraction : ShiftEvent()
+
     object HideEditShiftDialog : ShiftEvent()
     object GenerateSchedule : ShiftEvent()
     object LoadActiveWorkWeek : ShiftEvent()
+    object RefreshData : ShiftEvent()
 }

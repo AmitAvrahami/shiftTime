@@ -7,6 +7,7 @@ import androidx.annotation.RequiresApi
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyRow
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.shape.CircleShape
@@ -21,6 +22,8 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.text.font.FontFamily
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.DpOffset
@@ -28,9 +31,10 @@ import androidx.compose.ui.unit.dp
 import androidx.hilt.navigation.compose.hiltViewModel
 import com.example.shiftime.domain.model.Shift
 import com.example.shiftime.domain.model.WorkWeek
+import com.example.shiftime.domain.usecases.schedule.SchedulingData
 import com.example.shiftime.presentation.ui.events.modelevents.ShiftEvent
 import com.example.shiftime.presentation.ui.events.uievents.UiEvent
-import com.example.shiftime.presentation.ui.viewmodels.ShiftViewModel
+import com.example.shiftime.presentation.ui.view.viewmodels.ShiftViewModel
 import com.example.shiftime.utils.enums.AssignmentStyle
 import com.example.shiftime.utils.enums.ShiftType
 import java.text.SimpleDateFormat
@@ -53,8 +57,15 @@ fun CreateScheduleScreen(
     val state by viewModel.state.collectAsState()
     val shifts by viewModel.shifts.collectAsState()
     val context = LocalContext.current
+    // הוסף את ה-states החדשים
+    val schedulingData by viewModel.schedulingData.collectAsState()
+    val debugInfo by viewModel.debugInfo.collectAsState()
+    val dataExtractionError by viewModel.dataExtractionError.collectAsState()
 
-    // איסוף אירועי UI
+    // הוסף state לתצוגת הדיבוג
+    var showDebugDialog by remember { mutableStateOf(false) }
+
+
     LaunchedEffect(key1 = true) {
         viewModel.uiEvent.collect { event ->
             when (event) {
@@ -76,10 +87,35 @@ fun CreateScheduleScreen(
             horizontalAlignment = Alignment.CenterHorizontally,
         ) {
             ScreenHeaderBanner(title = "ניהול משמרות")
+            // הוסף כפתור בדיקת נתונים!
+            TestDataButton(
+                onTestClick = {
+                    viewModel.onEvent(ShiftEvent.TestDataExtraction)
+                    showDebugDialog = true
+                },
+                isEnabled = state.currentWorkWeek != null,
+                modifier = Modifier.padding(horizontal = 16.dp)
+            )
+
+            // הצגת שגיאה אם יש
+            dataExtractionError?.let { error ->
+                Card(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .padding(16.dp),
+                    colors = CardDefaults.cardColors(containerColor = MaterialTheme.colorScheme.errorContainer)
+                ) {
+                    Text(
+                        text = "שגיאה: $error",
+                        modifier = Modifier.padding(16.dp),
+                        color = MaterialTheme.colorScheme.onErrorContainer,
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // בחירת שבוע קיים
             if (state.allWorkWeeks.isNotEmpty()) {
                 WorkWeekSelector(
                     workWeeks = state.allWorkWeeks,
@@ -89,8 +125,16 @@ fun CreateScheduleScreen(
                     }
                 )
             }
+            // דיאלוג הדיבוג
+            if (showDebugDialog && debugInfo.isNotEmpty()) {
+                DataDebugDialog(
+                    debugInfo = debugInfo,
+                    schedulingData = schedulingData,
+                    onDismiss = { showDebugDialog = false }
+                )
+            }
 
-            // יצירת שבוע חדש
+
             AssignmentStyleDropdown(
                 selectedStyle = state.assignmentStyle.label,
                 onStyleSelected = { style -> viewModel.onEvent(ShiftEvent.SetAssignmentStyle(style)) }
@@ -112,9 +156,13 @@ fun CreateScheduleScreen(
                 }
             )
 
+            GenerateShiftsButton(
+                onGenerateClick = { viewModel.onEvent(ShiftEvent.GenerateSchedule) },
+                isStartWeekInitialized = state.startDate != null
+            )
+
             Spacer(modifier = Modifier.height(16.dp))
 
-            // בוחר ימים
             WeekDaySelector(
                 selectedDay = state.selectedDay.ordinal,
                 onDaySelected = { dayIndex -> viewModel.onEvent(ShiftEvent.SetSelectedDay(dayIndex)) }
@@ -122,7 +170,6 @@ fun CreateScheduleScreen(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            // רשימת משמרות ליום נבחר
             val filteredShifts = shifts.filter { it.shiftDay == state.selectedDay }
             ShiftListForDay(
                 shifts = filteredShifts,
@@ -131,14 +178,12 @@ fun CreateScheduleScreen(
 
             Spacer(modifier = Modifier.weight(1f))
 
-            // כפתור יצירת סידור
             GenerateScheduleButton(
                 onClick = { viewModel.onEvent(ShiftEvent.GenerateSchedule) },
                 modifier = Modifier.padding(bottom = 24.dp)
             )
         }
 
-        // דיאלוג עריכת משמרת
         if (state.isEditDialogVisible && state.currentEditShift != null) {
             EditShiftDialog(
                 shift = state.currentEditShift!!,
@@ -147,7 +192,6 @@ fun CreateScheduleScreen(
             )
         }
 
-        // לוגיקת טעינה
         if (state.isLoading) {
             Box(
                 modifier = Modifier
@@ -160,6 +204,21 @@ fun CreateScheduleScreen(
                 )
             }
         }
+    }
+}
+
+@Composable
+private fun GenerateShiftsButton(
+    onGenerateClick: () -> Unit,
+    isStartWeekInitialized: Boolean = false
+) {
+    Button(
+        onClick = onGenerateClick,//TODO : CHECK IF DOESNT HAVE SHIFTS FOR THIS WEEK,
+        enabled = isStartWeekInitialized
+    ) {
+        Text(
+            text = "צור משמרות"
+        )
     }
 }
 
@@ -188,13 +247,13 @@ fun AssignmentStyleDropdown(
 ) {
     var expanded by remember { mutableStateOf(false) }
 
-    Box(modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.TopEnd)) {
+    Box(modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center)) {
         OutlinedButton(
             onClick = { expanded = true },
             shape = RoundedCornerShape(12.dp),
             modifier = Modifier
-                .padding(16.dp)
-                .widthIn(min = 170.dp),
+                .padding(16.dp),
+                //.widthIn(min = 170.dp),
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurface
@@ -280,11 +339,10 @@ fun WeekPickerButton(
         )
     }
 
-    Box(contentAlignment = Alignment.CenterEnd, modifier = Modifier.fillMaxWidth()) {
+    Box(contentAlignment = Alignment.Center, modifier = Modifier.fillMaxWidth().wrapContentSize(Alignment.Center)) {
         OutlinedButton(
             onClick = { datePickerDialog.show() },
             shape = RoundedCornerShape(12.dp),
-            modifier = Modifier.padding(end = 16.dp),
             colors = ButtonDefaults.outlinedButtonColors(
                 containerColor = MaterialTheme.colorScheme.surfaceVariant,
                 contentColor = MaterialTheme.colorScheme.onSurface
@@ -335,7 +393,7 @@ fun ShiftListForDay(
         modifier = modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        horizontalArrangement = Arrangement.spacedBy(8.dp),
+        horizontalArrangement = if(!shifts.isEmpty()) Arrangement.spacedBy(8.dp) else Arrangement.Center,
         contentPadding = PaddingValues(horizontal = 16.dp)
     ) {
         if (shifts.isEmpty()) {
@@ -918,6 +976,96 @@ fun ShiftCard(
     }
 }
 
+// =============================================
+// 4. רכיבי UI חדשים לבדיקה
+// =============================================
+
+@Composable
+fun TestDataButton(
+    onTestClick: () -> Unit,
+    isEnabled: Boolean = true,
+    modifier: Modifier = Modifier
+) {
+    OutlinedButton(
+        onClick = onTestClick,
+        enabled = isEnabled,
+        modifier = modifier.fillMaxWidth(),
+        shape = RoundedCornerShape(12.dp),
+        colors = ButtonDefaults.outlinedButtonColors(
+            containerColor = MaterialTheme.colorScheme.secondaryContainer,
+            contentColor = MaterialTheme.colorScheme.onSecondaryContainer
+        )
+    ) {
+        Icon(
+            Icons.Default.Search,
+            contentDescription = "בדיקת נתונים",
+            modifier = Modifier.padding(end = 8.dp)
+        )
+        Text("בדוק נתוני שיבוץ")
+    }
+}
+
+@Composable
+fun DataDebugDialog(
+    debugInfo: String,
+    schedulingData: SchedulingData?,
+    onDismiss: () -> Unit
+) {
+    AlertDialog(
+        onDismissRequest = onDismiss,
+        confirmButton = {
+            TextButton(onClick = onDismiss) {
+                Text("סגור")
+            }
+        },
+        title = {
+            Text("מידע דיבוג - נתוני השיבוץ")
+        },
+        text = {
+            LazyColumn(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .heightIn(max = 400.dp)
+            ) {
+                item {
+                    Text(
+                        text = debugInfo,
+                        style = MaterialTheme.typography.bodySmall,
+                        fontFamily = FontFamily.Monospace
+                    )
+                }
+
+                // הצגת נתונים נוספים
+                schedulingData?.let { data ->
+                    item {
+                        Spacer(modifier = Modifier.height(16.dp))
+                        Divider()
+                        Spacer(modifier = Modifier.height(8.dp))
+
+                        Text(
+                            text = "📊 סטטיסטיקות מהירות:",
+                            style = MaterialTheme.typography.titleSmall,
+                            fontWeight = FontWeight.Bold
+                        )
+
+                        Text(
+                            text = buildString {
+                                appendLine("• סה״כ משמרות לשיבוץ: ${data.getUnfilledShifts().size}")
+                                appendLine("• סה״כ עמדות פתוחות: ${data.getUnfilledShifts().sumOf { data.getMissingEmployeesCount(it.id) }}")
+                                appendLine("• עובדים זמינים: ${data.getAvailableEmployees().size}")
+                                appendLine("• סה״כ קיבולת עובדים: ${data.getAvailableEmployees().sumOf { data.getRemainingShiftCapacity(it.id) }}")
+                            },
+                            style = MaterialTheme.typography.bodySmall,
+                            fontFamily = FontFamily.Monospace
+                        )
+                    }
+                }
+            }
+        },
+        shape = RoundedCornerShape(16.dp)
+    )
+}
+
 @RequiresApi(Build.VERSION_CODES.O)
 @Composable
 fun WorkWeekSelector(
@@ -1059,3 +1207,4 @@ fun WorkWeekSelector(
         }
     }
 }
+

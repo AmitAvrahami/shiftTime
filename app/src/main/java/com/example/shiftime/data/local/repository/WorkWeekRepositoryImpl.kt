@@ -1,11 +1,10 @@
 package com.example.shiftime.data.repository
 
 import com.example.shiftime.data.local.dao.WorkWeekDao
+import com.example.shiftime.data.local.entity.WorkWeekEntity
 import com.example.shiftime.data.local.mapper.toDomain
 import com.example.shiftime.data.local.mapper.toEntity
-import com.example.shiftime.data.mapper.toDomain
-import com.example.shiftime.data.mapper.toDate
-import com.example.shiftime.data.mapper.toEntity
+import com.example.shiftime.data.local.mapper.toDate
 import com.example.shiftime.domain.model.WorkWeek
 import com.example.shiftime.domain.repository.WorkWeekRepository
 import kotlinx.coroutines.flow.Flow
@@ -26,8 +25,8 @@ class WorkWeekRepositoryImpl @Inject constructor(
         return workWeekDao.getWorkWeekById(id)?.toDomain()
     }
 
-    override suspend fun getActiveWorkWeek(): WorkWeek? {
-        return workWeekDao.getActiveWorkWeek()?.toDomain()
+    override fun getActiveWorkWeek(): Flow<WorkWeekEntity?> {
+        return workWeekDao.getActiveWorkWeek()
     }
 
     override suspend fun deactivateAllWorkWeeks() {

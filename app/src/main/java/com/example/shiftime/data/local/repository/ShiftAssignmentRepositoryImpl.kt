@@ -6,10 +6,10 @@ import com.example.shiftime.data.local.entity.ShiftAssignmentEntity
 import com.example.shiftime.data.local.entity.ShiftEntity
 import com.example.shiftime.data.local.mapper.toDomain
 import com.example.shiftime.domain.model.Employee
-import com.example.shiftime.domain.model.EmployeeWithAssignedShifts
+import com.example.shiftime.domain.model.EmployeeWithShifts
 import com.example.shiftime.domain.model.Shift
 import com.example.shiftime.domain.model.ShiftAssignment
-import com.example.shiftime.domain.model.ShiftWithAssignedEmployees
+import com.example.shiftime.domain.model.ShiftWithEmployees
 import com.example.shiftime.domain.repository.ShiftAssignmentRepository
 import com.example.shiftime.utils.enums.AssignmentStatus
 import kotlinx.coroutines.flow.Flow
@@ -77,17 +77,22 @@ class ShiftAssignmentRepositoryImpl @Inject constructor(
             .map { assignments -> assignments.map { it.toDomain() } }
     }
 
-    override fun getShiftWithAssignedEmployees(shiftId: Long): Flow<ShiftWithAssignedEmployees> {
+    override fun getShiftWithAssignedEmployees(shiftId: Long): Flow<ShiftWithEmployees> {
         return shiftAssignmentDao.getShiftWithAssignedEmployees(shiftId)
             .map { it.toDomain(employeeMapper, shiftMapper) }
     }
 
-    override fun getEmployeeWithAssignedShifts(employeeId: Long): Flow<EmployeeWithAssignedShifts> {
+    override fun getEmployeeWithAssignedShifts(employeeId: Long): Flow<EmployeeWithShifts> {
         return shiftAssignmentDao.getEmployeeWithAssignedShifts(employeeId)
             .map { it.toDomain(employeeMapper, shiftMapper) }
     }
 
     override suspend fun getAssignmentCountForShift(shiftId: Long): Int {
         return shiftAssignmentDao.getAssignmentCountForShift(shiftId)
+    }
+
+
+    override fun getAssignmentsByWorkWeekId(workWeekId: Long): Flow<List<ShiftAssignmentEntity>> {
+        return shiftAssignmentDao.getAssignmentsByWorkWeekId(workWeekId)
     }
 }

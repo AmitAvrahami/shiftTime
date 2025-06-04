@@ -2,6 +2,7 @@ package com.example.shiftime.di
 
 import android.content.Context
 import androidx.room.Room
+import com.example.shiftime.data.local.dao.EmployeeConstraintDao
 import com.example.shiftime.data.local.dao.EmployeeDao
 import com.example.shiftime.data.local.dao.ShiftAssignmentDao
 import com.example.shiftime.data.local.dao.ShiftDao
@@ -49,6 +50,12 @@ object LocalDatabaseModule {
     @Singleton
     fun provideShiftAssignmentDao(database: AppDatabase): ShiftAssignmentDao {
         return database.shiftAssignmentDao()
+    }
+
+    @Provides
+    @Singleton
+    fun provideEmployeeConstraintDao(database: AppDatabase): EmployeeConstraintDao {
+        return database.employeeConstraintDao()
     }
 
 }

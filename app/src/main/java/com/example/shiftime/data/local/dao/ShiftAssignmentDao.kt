@@ -5,9 +5,9 @@ import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
 import androidx.room.Transaction
-import com.example.shiftime.data.local.entity.EmployeeWithShifts
+import com.example.shiftime.data.local.entity.EmployeeWithShiftsEntity
 import com.example.shiftime.data.local.entity.ShiftAssignmentEntity
-import com.example.shiftime.data.local.entity.ShiftWithEmployees
+import com.example.shiftime.data.local.entity.ShiftWithEmployeesEntity
 import kotlinx.coroutines.flow.Flow
 
 @Dao
@@ -35,9 +35,14 @@ interface ShiftAssignmentDao {
 
     @Transaction
     @Query("SELECT * FROM shifts WHERE id = :shiftId")
-    fun getShiftWithAssignedEmployees(shiftId: Long): Flow<ShiftWithEmployees>
+    fun getShiftWithAssignedEmployees(shiftId: Long): Flow<ShiftWithEmployeesEntity>
 
     @Transaction
     @Query("SELECT * FROM employees WHERE id = :employeeId")
-    fun getEmployeeWithAssignedShifts(employeeId: Long): Flow<EmployeeWithShifts>
+    fun getEmployeeWithAssignedShifts(employeeId: Long): Flow<EmployeeWithShiftsEntity>
+
+    @Query("SELECT * FROM shift_assignments sa INNER JOIN shifts s ON sa.shiftId = s.id WHERE s.workWeekId = :workWeekId")
+    fun getAssignmentsByWorkWeekId(workWeekId: Long): Flow<List<ShiftAssignmentEntity>>
+
+
 }

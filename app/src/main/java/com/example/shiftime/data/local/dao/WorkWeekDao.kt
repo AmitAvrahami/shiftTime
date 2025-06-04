@@ -24,7 +24,7 @@ interface WorkWeekDao {
     suspend fun getWorkWeekById(id: Long): WorkWeekEntity?
 
     @Query("SELECT * FROM work_weeks WHERE isActive = 1 LIMIT 1")
-    suspend fun getActiveWorkWeek(): WorkWeekEntity?
+     fun getActiveWorkWeek():   Flow<WorkWeekEntity?>
 
     @Query("UPDATE work_weeks SET isActive = 0")
     suspend fun deactivateAllWorkWeeks()

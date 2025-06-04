@@ -1,22 +1,24 @@
 package com.example.shiftime.domain.usecases.employees
 
 import com.example.shiftime.data.local.entity.EmployeeEntity
+import com.example.shiftime.data.local.mapper.toDomain
+import com.example.shiftime.domain.model.Employee
 import com.example.shiftime.domain.repository.EmployeeRepository
 import com.example.shiftime.presentation.ui.common.state.UiState
 import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
+import kotlinx.coroutines.flow.map
 import javax.inject.Inject
 
 class GetEmployeesUseCase @Inject constructor(
     private val employeeRepository: EmployeeRepository
 ) {
-     operator fun invoke() : Flow<UiState<List<EmployeeEntity>>> = flow {
-        emit(UiState.Loading)
+     operator fun invoke() : Flow<List<Employee>> {
         try {
-            val employees = employeeRepository.getAllEmployees()
-            emit(UiState.Success(employees))
-        } catch (e: Exception) {
-            emit(UiState.Error(e.message ?: "Unknown error"))
+            return employeeRepository.getAllEmployees().map { it.map { it.toDomain() } }
+            }
+        catch (e: Exception) {
+            throw e
         }
     }
 

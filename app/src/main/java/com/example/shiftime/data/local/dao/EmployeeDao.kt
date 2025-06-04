@@ -21,8 +21,12 @@ interface EmployeeDao {
     suspend fun deleteEmployee(employee: EmployeeEntity)
 
     @Query("SELECT * FROM employees")
-    fun getAllEmployees(): List<EmployeeEntity>
+    fun getAllEmployees(): Flow<List<EmployeeEntity>>
 
     @Query("SELECT * FROM employees WHERE id = :id")
     suspend fun getEmployeeById(id: Long): EmployeeEntity?
+
+    @Query("SELECT * FROM employees WHERE id IN (:employeeIds)")
+    fun getEmployeesByIds(employeeIds: List<Long>): Flow<List<EmployeeEntity>>
+
 }

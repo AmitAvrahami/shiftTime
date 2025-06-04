@@ -16,7 +16,10 @@ class EmployeeRepositoryImp @Inject constructor(
 
     override suspend fun deleteEmployee(employee: EmployeeEntity) = employeeDao.deleteEmployee(employee)
 
-    override fun getAllEmployees(): List<EmployeeEntity> = employeeDao.getAllEmployees()
+    override fun getAllEmployees(): Flow<List<EmployeeEntity>> = employeeDao.getAllEmployees()
 
     override suspend fun getEmployeeById(id: Long): EmployeeEntity? = employeeDao.getEmployeeById(id)
+
+    override fun getEmployeesByIds(employeeIds: List<Long>) : Flow<List<EmployeeEntity>> = employeeDao.getEmployeesByIds(employeeIds)
+
 }

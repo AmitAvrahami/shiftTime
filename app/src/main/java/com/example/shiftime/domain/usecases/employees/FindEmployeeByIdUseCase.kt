@@ -8,6 +8,15 @@ import kotlinx.coroutines.flow.Flow
 import kotlinx.coroutines.flow.flow
 import javax.inject.Inject
 
+/**
+ * Use case for finding an employee by their ID.
+ *
+ * This class encapsulates the business logic for retrieving an employee's details
+ * based on their unique identifier. It interacts with an [EmployeeRepository]
+ * to fetch the data and emits the result as a [Flow] of [UiState].
+ *
+ * @property employeeRepository The repository responsible for accessing employee data.
+ */
 class FindEmployeeByIdUseCase @Inject constructor(
     private val employeeRepository: EmployeeRepository
 ) {

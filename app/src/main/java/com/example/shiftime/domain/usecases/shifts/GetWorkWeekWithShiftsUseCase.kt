@@ -12,7 +12,7 @@ class GetWorkWeekWithShiftsUseCase @Inject constructor(
     private val workWeekRepository: WorkWeekRepository,
     private val shiftRepository: ShiftRepository
 ) {
-    fun getActiveWorkWeekWithShifts(): Flow<WorkWeekWithShifts?> {
+    operator fun invoke(): Flow<WorkWeekWithShifts?> {
         return workWeekRepository.observeActiveWorkWeek().combine(
             shiftRepository.getAllShifts()
         ) { workWeek, allShifts ->

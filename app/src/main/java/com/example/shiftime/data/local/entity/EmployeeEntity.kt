@@ -1,11 +1,7 @@
 package com.example.shiftime.data.local.entity
 
-import androidx.compose.ui.res.painterResource
 import androidx.room.Entity
 import androidx.room.PrimaryKey
-import com.example.shiftime.R
-import com.example.shiftime.presentation.ui.common.state.EmployeeUiModel
-import com.example.shiftime.presentation.ui.view.constraintscreen.UnavailableShift
 import com.example.shiftime.utils.enums.Role
 
 @Entity(tableName = "employees")

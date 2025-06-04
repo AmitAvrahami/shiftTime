@@ -1,19 +1,18 @@
 package com.example.shiftime.data.local.entity
-
 import androidx.room.Embedded
 import androidx.room.Junction
 import androidx.room.Relation
 
-data class ShiftWithEmployees(
-    @Embedded val shift: ShiftEntity,
+data class EmployeeWithShiftsEntity(
+    @Embedded val employee: EmployeeEntity,
     @Relation(
         parentColumn = "id",
         entityColumn = "id",
         associateBy = Junction(
             value = ShiftAssignmentEntity::class,
-            parentColumn = "shiftId",
-            entityColumn = "employeeId"
+            parentColumn = "employeeId",
+            entityColumn = "shiftId"
         )
     )
-    val employees: List<EmployeeEntity>
+    val shifts: List<ShiftEntity>
 )
